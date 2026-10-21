@@ -1,0 +1,635 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Content | Edu-studio</title>
+
+
+<link rel="icon" type="image/png" sizes="100x100" href="icon.png">
+
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+            h1 a,
+            h1 a:hover,
+            h1 a:visited,
+            h1 a:active {
+            color: black;
+            text-decoration: none;
+            }
+
+        body {
+            font-family: "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
+            background: #fff;
+            color: #111;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .page {
+            width: 100%;
+            max-width: 650px;
+            margin: 0 auto;
+        }
+
+        /* HEADER */
+        .header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 35px;
+        }
+
+        .back-button {
+            width: 42px;
+            height: 42px;
+            border: none;
+            border-radius: 50%;
+            background: #f0f0f0;
+            font-size: 23px;
+            cursor: pointer;
+        }
+
+        .brand {
+            background: #000;
+            color: #fff;
+            padding: 13px 22px;
+            border-radius: 30px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        /* FORM CARD */
+        .content-card {
+            background: #f7f7f7;
+            border-radius: 28px;
+            padding: 30px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .content-card h1 {
+            font-size: 27px;
+            margin-bottom: 10px;
+        }
+
+        .description {
+            color: #777;
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .required {
+            color: #d00;
+        }
+
+        .content-input {
+            width: 100%;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 14px;
+            background: #fff;
+            outline: none;
+            font-size: 15px;
+            transition: border-color 0.2s;
+        }
+
+        .content-input:focus {
+            border-color: #000;
+        }
+
+        /* FILE UPLOAD */
+        .file-box {
+            border: 2px dashed #ccc;
+            border-radius: 18px;
+            padding: 30px 15px;
+            text-align: center;
+            background: #fff;
+            transition: border-color 0.2s;
+        }
+
+        .file-box:hover {
+            border-color: #000;
+        }
+
+        .upload-icon {
+            font-size: 38px;
+            margin-bottom: 12px;
+        }
+
+        .file-box p {
+            color: #666;
+            font-size: 13px;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .file-button {
+            display: inline-block;
+            padding: 12px 22px;
+            border-radius: 30px;
+            background: #000;
+            color: #fff;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .file-button:hover {
+            background: #333;
+        }
+
+        #contentFile {
+            display: none;
+        }
+
+        .file-info {
+            display: none;
+            margin-top: 18px;
+            padding: 12px;
+            background: #f0f0f0;
+            border-radius: 12px;
+            text-align: left;
+            overflow-wrap: anywhere;
+        }
+
+        .file-info strong {
+            display: block;
+            font-size: 13px;
+            margin-bottom: 5px;
+        }
+
+        .file-info span {
+            color: #666;
+            font-size: 12px;
+        }
+
+        .remove-file {
+            display: block;
+            margin-top: 8px;
+            border: none;
+            background: transparent;
+            color: #c00;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        /* BUTTONS */
+        .form-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 30px;
+        }
+
+        .submit-button,
+        .cancel-button {
+            flex: 1;
+            padding: 15px;
+            border-radius: 30px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .submit-button {
+            background: #000;
+            color: #fff;
+            border: 1px solid #000;
+        }
+
+        .submit-button:hover {
+            background: #333;
+        }
+
+        .cancel-button {
+            background: #fff;
+            color: #111;
+            border: 1px solid #ddd;
+        }
+
+        .message {
+            display: none;
+            margin-top: 20px;
+            padding: 13px;
+            border-radius: 12px;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .message.error {
+            display: block;
+            background: #fff0f0;
+            color: #b00020;
+        }
+
+        .message.success {
+            display: block;
+            background: #eaf7ed;
+            color: #17652c;
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 12px;
+            }
+
+            .content-card {
+                padding: 22px 18px;
+                border-radius: 22px;
+            }
+
+            .content-card h1 {
+                font-size: 24px;
+            }
+
+            .form-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="page">
+
+    <!-- HEADER -->
+    <header class="header">
+        <button
+            class="back-button"
+            type="button"
+            onclick="goBack()"
+            aria-label="Go back"
+        >←</button>
+
+        <div class="brand">Edu-studio</div>
+    </header>
+
+    <!-- ADD CONTENT FORM -->
+    <main class="content-card">
+        <h1>Add <a href="ad-log.html">new</a> content</h1>
+
+        <p class="description">
+            Share educational materials with the Edu-studio community.
+            Enter a content name and choose a file from your device.
+        </p>
+
+        <form id="contentForm">
+
+
+
+            
+<!-- CONTENT CATEGORY -->
+<div class="form-group">
+    <label for="contentCategory">
+        Content category <span class="required">*</span>
+    </label>
+
+    <select
+        id="contentCategory"
+        class="content-input"
+        required
+    >
+        <option value="" disabled selected>
+            Select a category
+        </option>
+        <option value="Technology">Technology</option>
+        <option value="Science">Science</option>
+        <option value="Business">Business</option>
+        <option value="Mathematics">Mathematics</option>
+        <option value="Languages">Languages</option>
+        <option value="Other">Other</option>
+    </select>
+</div>
+
+
+
+
+
+            <!-- CONTENT NAME -->
+            <div class="form-group">
+                <label for="contentName">
+                    Content name <span class="required">*</span>
+                </label>
+
+                <input
+                    type="text"
+                    id="contentName"
+                    class="content-input"
+                    placeholder="e.g. Introduction to Biology"
+                    maxlength="150"
+                    required
+                >
+            </div>
+
+            <!-- FILE SELECTION -->
+            <div class="form-group">
+                <label for="contentFile">
+                    Select a file <span class="required">*</span>
+                </label>
+
+                <div class="file-box">
+                    <div class="upload-icon">↑</div>
+
+                    <p>
+                        Choose a document, presentation, image, or other
+                        educational material from your device.
+                    </p>
+
+                    <label for="contentFile" class="file-button">
+                        Choose file
+                    </label>
+
+                    <input
+                        type="file"
+                        id="contentFile"
+                        required
+                        accept=".pdf,.doc,.docx,.ppt,.pptx,.txt,.jpg,.jpeg,.png,.mp4"
+                    >
+
+                    <div class="file-info" id="fileInfo">
+                        <strong id="fileName"></strong>
+                        <span id="fileSize"></span>
+
+                        <button
+                            type="button"
+                            class="remove-file"
+                            id="removeFile"
+                        >
+                            Remove selected file
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FEEDBACK -->
+            <div
+                id="message"
+                class="message"
+                role="status"
+                aria-live="polite"
+            ></div>
+
+            <!-- ACTIONS -->
+            <div class="form-actions">
+                <button
+                    type="button"
+                    class="cancel-button"
+                    onclick="goBack()"
+                >
+                    Cancel
+                </button>
+
+                <button type="submit" class="submit-button">
+                    Add content
+                </button>
+            </div>
+
+        </form>
+    </main>
+
+</div>
+
+<div class="footer">
+  Created by
+  <a href="https://www.instagram.com/jones_teo_the_great/" target="_blank" rel="noopener noreferrer">
+    Inno Jones
+  </a>
+</div>
+
+<style>
+.footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: 10px;
+  text-align: center;
+  background: #fff;
+  color: #777;
+  font-size: 12px;
+  border-top: 1px solid #eee;
+}
+
+.footer a {
+  color: #000;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.footer a:hover {
+  text-decoration: underline;
+}
+</style>
+
+
+<script>
+"use strict";
+
+const API_BASE = "http://127.0.0.1:8000";
+
+const fileInput = document.getElementById("contentFile");
+const fileInfo = document.getElementById("fileInfo");
+const fileName = document.getElementById("fileName");
+const fileSize = document.getElementById("fileSize");
+const message = document.getElementById("message");
+const contentForm = document.getElementById("contentForm");
+
+const nameInput = document.getElementById("contentName");
+const categoryInput = document.getElementById("contentCategory");
+
+const submitButton = contentForm.querySelector(
+    'button[type="submit"]'
+);
+
+function goBack() {
+    window.location.href = "/live.html";
+}
+
+function showMessage(text, type) {
+    message.textContent = text;
+    message.className = "message " + type;
+}
+
+function formatFileSize(bytes) {
+    if (bytes < 1024) {
+        return bytes + " bytes";
+    }
+
+    if (bytes < 1024 * 1024) {
+        return (bytes / 1024).toFixed(1) + " KB";
+    }
+
+    return (bytes / (1024 * 1024)).toFixed(2) + " MB";
+}
+
+// Display the selected file.
+fileInput.addEventListener("change", function () {
+    const file = fileInput.files[0];
+
+    if (!file) {
+        fileInfo.style.display = "none";
+        return;
+    }
+
+    if (file.size > 20 * 1024 * 1024) {
+        fileInput.value = "";
+        fileInfo.style.display = "none";
+
+        showMessage(
+            "The selected file exceeds the 20 MB limit.",
+            "error"
+        );
+        return;
+    }
+
+    fileName.textContent = file.name;
+    fileSize.textContent = formatFileSize(file.size);
+    fileInfo.style.display = "block";
+
+    message.className = "message";
+    message.textContent = "";
+});
+
+// Remove the selected file.
+document.getElementById("removeFile").addEventListener(
+    "click",
+    function () {
+        fileInput.value = "";
+        fileInfo.style.display = "none";
+        message.className = "message";
+        message.textContent = "";
+    }
+);
+
+// Upload the content to FastAPI.
+contentForm.addEventListener("submit", async function (event) {
+    event.preventDefault();
+
+    const name = nameInput.value.trim();
+    const category = categoryInput.value;
+    const file = fileInput.files[0];
+
+    if (!name) {
+        showMessage("Please enter a content name.", "error");
+        return;
+    }
+
+    if (!category) {
+        showMessage("Please select a category.", "error");
+        return;
+    }
+
+    if (!file) {
+        showMessage("Please select a file.", "error");
+        return;
+    }
+
+    if (file.size === 0) {
+        showMessage("The selected file is empty.", "error");
+        return;
+    }
+
+    if (file.size > 20 * 1024 * 1024) {
+        showMessage("The file must be 20 MB or smaller.", "error");
+        return;
+    }
+
+    // Retrieve the logged-in user.
+    let user;
+
+    try {
+        user = JSON.parse(localStorage.getItem("user") || "null");
+    } catch (error) {
+        user = null;
+    }
+
+    if (!user || !user.id) {
+        showMessage(
+            "Please log in before adding content.",
+            "error"
+        );
+        return;
+    }
+
+    // Build the multipart form data expected by FastAPI.
+    const formData = new FormData();
+
+    formData.append("name", name);
+    formData.append("category", category);
+    formData.append("user_id", String(user.id));
+    formData.append("file", file);
+
+    submitButton.disabled = true;
+    submitButton.textContent = "Uploading...";
+
+    try {
+        const response = await fetch(
+            `${API_BASE}/content/upload`,
+            {
+                method: "POST",
+                body: formData
+            }
+        );
+
+        const result = await response.json().catch(() => ({}));
+
+        if (!response.ok) {
+            let errorMessage = result.detail ||
+                "Failed to upload content.";
+
+            if (Array.isArray(errorMessage)) {
+                errorMessage = errorMessage
+                    .map(error => error.msg)
+                    .join(", ");
+            }
+
+            throw new Error(errorMessage);
+        }
+
+        showMessage(
+            `Success! "${result.content.name}" was uploaded to ${result.content.category || category}.`,
+            "success"
+        );
+
+        console.log("Saved content:", result.content);
+
+        // Reset only after the server confirms success.
+        contentForm.reset();
+        fileInfo.style.display = "none";
+
+    } catch (error) {
+        console.error("Upload error:", error);
+
+        showMessage(
+            error.message ||
+                "Cannot connect to the server. Make sure FastAPI is running.",
+            "error"
+        );
+    } finally {
+        submitButton.disabled = false;
+        submitButton.textContent = "Add content";
+    }
+});
+</script>
+
+
+</body>
+</html>

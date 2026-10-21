@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Discover | Edu-studio</title>
+
+
+<link rel="icon" type="image/png" sizes="100x100" href="icon.png">
+
+
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
+  background: #fff;
+  color: #111;
+  padding: 20px;
+  padding-bottom: 100px;
+}
+
+.category:focus-visible,
+.resource button:focus-visible,
+.featured button:focus-visible {
+  outline: 2px solid #000;
+  outline-offset: 3px;
+}
+
+.category.active {
+  background: #000;
+  color: #fff;
+}
+
+.category.active span {
+  color: #fff;
+}
+
+.resource button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.resource .resource-icon {
+  display: grid;
+  place-items: center;
+}
+
+.resource-empty {
+  grid-column: 1 / -1;
+  padding: 25px;
+  border-radius: 20px;
+  background: #f7f7f7;
+  color: #777;
+  line-height: 1.6;
+}
+
+
+
+
+
+
+
+
+
+.page { max-width: 1100px; margin: auto; }
+
+.container {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 140px;
+  height: 42px;
+  padding: 0 25px;
+  background: #000;
+  border-radius: 50px;
+  margin-bottom: 25px;
+}
+
+.container h1 { color: #fff; font-size: 15px; }
+
+h2 { font-size: 27px; margin-bottom: 9px; }
+.subtitle { color: #777; line-height: 1.6; margin-bottom: 25px; }
+
+.featured {
+  padding: 28px;
+  min-height: 220px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  border-radius: 28px;
+  color: white;
+  background: linear-gradient(135deg, #111, #555);
+  margin-bottom: 32px;
+}
+
+.featured .tag {
+  font-size: 12px;
+  background: rgba(255,255,255,.18);
+  border-radius: 20px;
+  padding: 8px 12px;
+  margin-bottom: 18px;
+}
+
+.featured h3 { font-size: 26px; margin-bottom: 10px; }
+.featured p { color: #ddd; line-height: 1.6; max-width: 430px; }
+
+.featured button {
+  margin-top: 20px;
+  padding: 12px 19px;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.section { margin-bottom: 32px; }
+.section h3 { font-size: 20px; margin-bottom: 15px; }
+
+.categories {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.category {
+  border: 0;
+  text-align: left;
+  background: #f5f5f5;
+  border-radius: 20px;
+  padding: 18px 14px;
+  cursor: pointer;
+}
+
+.category span { display: block; font-size: 27px; margin-bottom: 12px; }
+.category strong { font-size: 14px; }
+.category:hover, .category.active { background: #e6e6e6; }
+
+.resources { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
+
+.resource {
+  background: #f7f7f7;
+  border-radius: 22px;
+  padding: 20px;
+}
+
+.resource-icon {
+  width: 55px;
+  height: 55px;
+  border-radius: 17px;
+  display: grid;
+  place-items: center;
+  font-size: 27px;
+  background: #e9e9e9;
+  margin-bottom: 17px;
+}
+
+.resource small { color: #777; }
+.resource h4 { font-size: 17px; margin: 8px 0; }
+.resource p { color: #777; font-size: 13px; line-height: 1.6; }
+.resource button {
+  margin-top: 15px;
+  border: none;
+  border-radius: 25px;
+  padding: 10px 15px;
+  color: #fff;
+  background: #000;
+  cursor: pointer;
+}
+
+.nav {
+  position: fixed;
+  z-index: 1000;
+  left: 50%;
+  bottom: 15px;
+  transform: translateX(-50%);
+  width: min(calc(100% - 30px), 500px);
+  min-height: 65px;
+  padding: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  gap: 5px;
+  border: 1px solid rgba(0,0,0,.25);
+  border-radius: 50px;
+  background: rgba(255,255,255,.88);
+  backdrop-filter: blur(15px);
+  box-shadow: 0 5px 25px rgba(0,0,0,.15);
+}
+
+.navbutton {
+  flex: 1;
+  min-width: 0;
+  height: 50px;
+  border: none;
+  border-radius: 40px;
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+}
+
+.navbutton:hover { background: #eee; }
+.navbutton.active { background: #000; color: #fff; }
+.nav-icon { font-size: 18px; }
+.nav-text { font-size: 10px; }
+
+@media(max-width:600px) {
+  body { padding: 15px; padding-bottom: 100px; }
+  .categories { grid-template-columns: repeat(2, 1fr); }
+  .resources { grid-template-columns: 1fr; }
+  .featured { padding: 23px; }
+  .featured h3 { font-size: 23px; }
+}
+
+@media(max-width:350px) {
+  .nav-text { display: none; }
+}
+</style>
+</head>
+
+<body>
+<div class="page">
+  <div class="container"><h1>Edu-studio</h1></div>
+
+  <h2>Discover something new</h2>
+  <p class="subtitle">Explore ideas, develop skills, and find your next learning adventure.</p>
+
+  <section class="featured">
+    <span class="tag">FEATURED LEARNING</span>
+    <h3>Build your digital skills</h3>
+    <p>Explore programming, web development, and the technology shaping our world.</p>
+
+
+
+    <section class="section">
+        <h3 id="resourceHeading">Recommended for you</h3>
+        <div class="resources" id="resources">
+          <p class="resource">Loading educational resources...</p>
+        </div>
+      </section>
+
+
+
+
+ </section>
+
+  <section class="section">
+    <h3>Explore categories</h3>
+    <div class="categories">
+      <button class="category" data-category="Technology">
+        <span>💻</span><strong>Technology</strong>
+      </button>
+      <button class="category" data-category="Science">
+        <span>🔬</span><strong>Science</strong>
+      </button>
+      <button class="category" data-category="Business">
+        <span>📊</span><strong>Business</strong>
+      </button>
+      <button class="category" data-category="Mathematics">
+        <span>📐</span><strong>Mathematics</strong>
+      </button>
+      <button class="category" data-category="Languages">
+        <span>📚</span><strong>Languages</strong>
+      </button>
+      <button class="category" data-category="All">
+        <span>✨</span><strong>Everything</strong>
+      </button>
+    </div>
+  </section>
+
+  <section class="section">
+    <h3 id="resourceHeading">Recommended for you</h3>
+    <div class="resources" id="resources"></div>
+  </section>
+</div>
+
+<nav class="nav">
+  <button class="navbutton" onclick="location.href='/live.html'">
+    <span class="nav-icon">⌂</span><span class="nav-text">Home</span>
+  </button>
+  <button class="navbutton" onclick="location.href='/search.html'">
+    <span class="nav-icon">⌕</span><span class="nav-text">Search</span>
+  </button>
+  <button class="navbutton active" onclick="location.href='/discover.html'">
+    <span class="nav-icon">◇</span><span class="nav-text">Discover</span>
+  </button>
+  <button class="navbutton" onclick="location.href='/profile.html'">
+    <span class="nav-icon">●</span><span class="nav-text">Profile</span>
+  </button>
+</nav>
+
+
+
+<div class="footer">
+  Created by
+  <a href="https://www.instagram.com/jones_teo_the_great/" target="_blank" rel="noopener noreferrer">
+    Inno Jones
+  </a>
+</div>
+
+<style>
+.footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: 10px;
+  text-align: center;
+  background: #fff;
+  color: #777;
+  font-size: 12px;
+  border-top: 1px solid #eee;
+}
+
+.footer a {
+  color: #000;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.footer a:hover {
+  text-decoration: underline;
+}
+</style>
+
+
+
+
+
+
+
+
+<script>
+"use strict";
+
+const API_BASE = "http://127.0.0.1:8000";
+
+// Authentication: use the existing Edu-studio login.
+let user = null;
+
+try {
+  const savedUser = localStorage.getItem("user");
+  user = savedUser ? JSON.parse(savedUser) : null;
+} catch (error) {
+  console.error("Could not read saved user:", error);
+  localStorage.removeItem("user");
+}
+
+if (!user || !user.id) {
+  window.location.replace("/sample.html");
+}
+
+const resourcesElement = document.getElementById("resources");
+const resourceHeading = document.getElementById("resourceHeading");
+const categoryButtons = document.querySelectorAll(".category");
+
+let contents = [];
+let selectedCategory = "All";
+let loading = false;
+let loadError = false;
+
+// Match the categories supported by the Search page.
+function getCategory(item) {
+  const category = String(item.category || "Other").trim();
+
+  const knownCategories = [
+    "Technology",
+    "Science",
+    "Business",
+    "Mathematics",
+    "Languages",
+    "Other"
+  ];
+
+  return knownCategories.find(
+    value => value.toLowerCase() === category.toLowerCase()
+  ) || "Other";
+}
+
+// Determine an icon from the resource filename.
+function getResourceIcon(item) {
+  const filename = String(item.original_filename || "");
+  const extension = filename.split(".").pop().toLowerCase();
+
+  const icons = {
+    pdf: "📕",
+    doc: "📝",
+    docx: "📝",
+    ppt: "📊",
+    pptx: "📊",
+    txt: "📄",
+    jpg: "🖼️",
+    jpeg: "🖼️",
+    png: "🖼️",
+    mp4: "🎬",
+    py: "💻",
+    html: "🌐",
+    css: "🎨",
+    js: "💻"
+  };
+
+  return icons[extension] || "📚";
+}
+
+// Open the resource using the same endpoint as Search.
+function openContent(contentId) {
+  const url =
+    `${API_BASE}/content/${encodeURIComponent(contentId)}/preview`;
+
+  window.open(url, "_blank", "noopener");
+}
+
+// Display an empty or loading message.
+function showMessage(message) {
+  resourcesElement.replaceChildren();
+
+  const element = document.createElement("p");
+  element.className = "resource-empty";
+  element.textContent = message;
+
+  resourcesElement.appendChild(element);
+}
+
+// Create a resource card safely.
+function createResourceCard(item) {
+  const card = document.createElement("article");
+  card.className = "resource";
+
+  const icon = document.createElement("div");
+  icon.className = "resource-icon";
+  icon.textContent = getResourceIcon(item);
+
+  const category = document.createElement("small");
+  category.textContent = getCategory(item);
+
+  const title = document.createElement("h4");
+  title.textContent = item.name || "Untitled resource";
+
+  const description = document.createElement("p");
+  description.textContent =
+    item.original_filename || "Educational resource";
+
+  const button = document.createElement("button");
+  button.type = "button";
+  button.textContent = "Explore topic";
+
+  button.addEventListener("click", () => {
+    if (item.id == null) return;
+    openContent(item.id);
+  });
+
+  card.append(icon, category, title, description, button);
+
+  return card;
+}
+
+// Filter and display the backend resources.
+function renderResources() {
+  resourceHeading.textContent =
+    selectedCategory === "All"
+      ? "Recommended for you"
+      : selectedCategory + " resources";
+
+  categoryButtons.forEach(button => {
+    const active = button.dataset.category === selectedCategory;
+
+    button.classList.toggle("active", active);
+    button.setAttribute("aria-pressed", String(active));
+  });
+
+  if (loading) {
+    showMessage("Loading educational resources...");
+    return;
+  }
+
+  if (loadError) {
+    showMessage(
+      "Could not load educational resources. Please try again."
+    );
+
+    const retry = document.createElement("button");
+    retry.type = "button";
+    retry.textContent = "Try again";
+    retry.style.marginTop = "15px";
+    retry.addEventListener("click", loadContent);
+
+    resourcesElement.appendChild(retry);
+    return;
+  }
+
+  const filtered = contents.filter(item => {
+    const category = getCategory(item);
+
+    return selectedCategory === "All" ||
+      category === selectedCategory;
+  });
+
+  resourcesElement.replaceChildren();
+
+  if (filtered.length === 0) {
+    showMessage(
+      selectedCategory === "All"
+        ? "No educational resources are available yet."
+        : `No resources found in ${selectedCategory}. Try another category.`
+    );
+    return;
+  }
+
+  filtered.forEach(item => {
+    resourcesElement.appendChild(createResourceCard(item));
+  });
+}
+
+// Load the same real resources used by Search.
+async function loadContent() {
+  if (loading) return;
+
+  loading = true;
+  loadError = false;
+  renderResources();
+
+  try {
+    const response = await fetch(`${API_BASE}/content`);
+    const data = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+      throw new Error(
+        data.detail || `Request failed (${response.status})`
+      );
+    }
+
+    if (!Array.isArray(data)) {
+      throw new Error("The server did not return a resource list.");
+    }
+
+    contents = data;
+  } catch (error) {
+    console.error("Could not load resources:", error);
+    loadError = true;
+  } finally {
+    loading = false;
+    renderResources();
+  }
+}
+
+// Category buttons.
+categoryButtons.forEach(button => {
+  button.setAttribute(
+    "aria-pressed",
+    String(button.dataset.category === selectedCategory)
+  );
+
+  button.addEventListener("click", () => {
+    selectedCategory = button.dataset.category;
+    renderResources();
+  });
+});
+
+// Featured Technology button.
+function selectFeatured() {
+  selectedCategory = "Technology";
+  renderResources();
+
+  document.getElementById("resourceHeading").scrollIntoView({
+    behavior: "smooth",
+    block: "start"
+  });
+}
+
+// Load the resources when Discover opens.
+loadContent();
+</script>
+
+</body>
+</html>

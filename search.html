@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Search | Edu-studio</title>
+
+
+
+<link rel="icon" type="image/png" sizes="10x100" href="icon.png">
+
+
+
+
+
+
+
+
+
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
+  background: #fff;
+  color: #111;
+  padding: 20px;
+  padding-bottom: 100px;
+}
+
+.page { max-width: 1100px; margin: auto; }
+
+.container {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 140px;
+  height: 42px;
+  padding: 0 25px;
+  background: #000;
+  border-radius: 50px;
+  margin-bottom: 25px;
+}
+
+.container h1 { color: white; font-size: 15px; }
+
+.heading { font-size: 28px; margin-bottom: 8px; }
+.subtitle { color: #777; line-height: 1.5; margin-bottom: 22px; }
+
+.search-box {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 15px 18px;
+  background: #f4f4f4;
+  border-radius: 18px;
+  margin-bottom: 22px;
+}
+
+.search-box span { font-size: 20px; }
+
+.search-box input {
+  width: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 16px;
+}
+
+.section-title { font-size: 20px; margin-bottom: 15px; }
+
+.filters {
+  display: flex;
+  gap: 9px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  margin-bottom: 24px;
+}
+
+.filter {
+  border: none;
+  padding: 11px 17px;
+  border-radius: 30px;
+  white-space: nowrap;
+  background: #f0f0f0;
+  cursor: pointer;
+}
+
+.filter.active { background: #000; color: #fff; }
+
+.course-list { display: grid; gap: 15px; }
+
+.course {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 18px;
+  background: #f7f7f7;
+  border-radius: 22px;
+}
+
+.course-icon {
+  width: 65px;
+  height: 65px;
+  border-radius: 17px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  font-size: 29px;
+  background: #e9e9e9;
+}
+
+.course-info { flex: 1; min-width: 0; }
+.course-info h3 { font-size: 17px; margin-bottom: 7px; }
+.course-info p { font-size: 13px; color: #777; line-height: 1.5; }
+.course-category { font-size: 12px; color: #666; margin-bottom: 6px; }
+.course button {
+  border: none;
+  background: #000;
+  color: #fff;
+  padding: 10px 13px;
+  border-radius: 20px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.empty {
+  padding: 35px 15px;
+  text-align: center;
+  background: #f7f7f7;
+  border-radius: 22px;
+  color: #777;
+  line-height: 1.6;
+}
+
+.nav {
+  position: fixed;
+  z-index: 1000;
+  left: 50%;
+  bottom: 15px;
+  transform: translateX(-50%);
+  width: min(calc(100% - 30px), 500px);
+  min-height: 65px;
+  padding: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  gap: 5px;
+  border: 1px solid rgba(0,0,0,.25);
+  border-radius: 50px;
+  background: rgba(255,255,255,.88);
+  backdrop-filter: blur(15px);
+  box-shadow: 0 5px 25px rgba(0,0,0,.15);
+}
+
+.navbutton {
+  flex: 1;
+  min-width: 0;
+  height: 50px;
+  border: none;
+  border-radius: 40px;
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+}
+
+.navbutton:hover { background: #eee; }
+.navbutton.active { background: #000; color: #fff; }
+.nav-icon { font-size: 18px; }
+.nav-text { font-size: 10px; }
+
+@media(max-width:480px) {
+  body { padding: 10px; padding-bottom: 95px; }
+  .container { height: 38px; margin-bottom: 20px; }
+  .heading { font-size: 25px; }
+  .course { gap: 10px; padding: 13px; }
+  .course-icon { width: 50px; height: 50px; font-size: 23px; }
+  .course-info h3 { font-size: 15px; }
+  .course button { padding: 9px 10px; font-size: 12px; }
+  .nav { bottom: 10px; width: calc(100% - 20px); min-height: 60px; }
+  .navbutton { height: 45px; }
+}
+
+@media(max-width:350px) {
+  .nav-text { display: none; }
+  .course { flex-wrap: wrap; }
+}
+</style>
+</head>
+
+<body>
+<div class="page">
+
+  <div class="container"><h1>Edu-studio</h1></div>
+
+  <h2 class="heading">Search and learn</h2>
+  <p class="subtitle">Find your next topic to explore.</p>
+
+  <div class="search-box">
+    <span>⌕</span>
+    <input id="searchInput" type="search"
+      placeholder="Search courses, topics..."
+      aria-label="Search educational content">
+  </div>
+
+  <h3 class="section-title">Categories</h3>
+
+  <div class="filters" id="filters">
+    <button class="filter active" data-category="All">All</button>
+    <button class="filter" data-category="Technology">Technology</button>
+    <button class="filter" data-category="Science">Science</button>
+    <button class="filter" data-category="Business">Business</button>
+    <button class="filter" data-category="Mathematics">Mathematics</button>
+    <button class="filter" data-category="Languages">Languages</button>
+  </div>
+
+  <h3 class="section-title">Learning resources</h3>
+  <div id="courseList" class="course-list"></div>
+</div>
+
+<nav class="nav">
+  <button class="navbutton" onclick="location.href='/live.html'">
+    <span class="nav-icon">⌂</span><span class="nav-text">Home</span>
+  </button>
+  <button class="navbutton active" onclick="location.href='/search.html'">
+    <span class="nav-icon">⌕</span><span class="nav-text">Search</span>
+  </button>
+  <button class="navbutton" onclick="location.href='/discover.html'">
+    <span class="nav-icon">◇</span><span class="nav-text">Discover</span>
+  </button>
+  <button class="navbutton" onclick="location.href='/profile.html'">
+    <span class="nav-icon">●</span><span class="nav-text">Profile</span>
+  </button>
+</nav>
+
+
+
+
+
+<div class="footer">
+  Created by
+  <a href="https://www.instagram.com/jones_teo_the_great/" target="_blank" rel="noopener noreferrer">
+    Inno Jones
+  </a>
+</div>
+
+<style>
+.footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: 10px;
+  text-align: center;
+  background: #fff;
+  color: #777;
+  font-size: 12px;
+  border-top: 1px solid #eee;
+}
+
+.footer a {
+  color: #000;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.footer a:hover {
+  text-decoration: underline;
+}
+</style>
+
+
+
+
+
+
+<script>
+"use strict";
+
+// Same API configuration and endpoints as your home page.
+const API_BASE = "http://127.0.0.1:8000";
+
+// Match the authentication approach used by the home page.
+let user = null;
+
+try {
+    const savedUser = localStorage.getItem("user");
+    user = savedUser ? JSON.parse(savedUser) : null;
+} catch (error) {
+    console.error("Could not read saved user:", error);
+    localStorage.removeItem("user");
+}
+
+if (!user || !user.id) {
+    window.location.replace("/sample.html");
+}
+
+// Search page elements.
+const searchInput = document.getElementById("searchInput");
+const courseList = document.getElementById("courseList");
+const filterButtons = document.querySelectorAll(".filter");
+
+let contents = [];
+let selectedCategory = "All";
+let loading = false;
+
+// Escape text before inserting it into HTML.
+function escapeHTML(value) {
+    return String(value ?? "").replace(/[&<>"']/g, char => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
+    })[char]);
+}
+
+// Read API responses consistently with the home page.
+async function readResponse(response) {
+    const data = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+        throw new Error(
+            data.detail || `Request failed (${response.status})`
+        );
+    }
+
+    return data;
+}
+
+// Infer categories from the available resource metadata.
+// Your current /content response does not show a category field.
+
+function getCategory(item) {
+    const category = String(item.category || "Other").trim();
+
+    const knownCategories = [
+        "Technology",
+        "Science",
+        "Business",
+        "Mathematics",
+        "Languages",
+        "Other"
+    ];
+
+    return knownCategories.find(
+        value => value.toLowerCase() === category.toLowerCase()
+    ) || "Other";
+}
+
+// Match the preview endpoint used by the home page.
+function openContent(contentId) {
+    const url =
+        `${API_BASE}/content/${encodeURIComponent(contentId)}/preview`;
+
+    window.open(url, "_blank", "noopener");
+}
+
+// Create a card for a real resource returned by the API.
+function createResourceCard(item) {
+    const card = document.createElement("article");
+    card.className = "course";
+
+    const extension = String(item.original_filename || "")
+        .split(".")
+        .pop()
+        .toLowerCase();
+
+    const fileIcons = {
+        pdf: "📕",
+        doc: "📝",
+        docx: "📝",
+        ppt: "📊",
+        pptx: "📊",
+        txt: "📄",
+        jpg: "🖼️",
+        jpeg: "🖼️",
+        png: "🖼️",
+        mp4: "🎬"
+    };
+
+    const icon = document.createElement("div");
+    icon.className = "course-icon";
+    icon.textContent = fileIcons[extension] || "📚";
+
+    const info = document.createElement("div");
+    info.className = "course-info";
+
+    const category = document.createElement("div");
+    category.className = "course-category";
+    category.textContent = getCategory(item);
+
+    const title = document.createElement("h3");
+    title.textContent = item.name || "Untitled resource";
+
+    const description = document.createElement("p");
+    description.textContent =
+        item.original_filename || "Educational resource";
+
+    info.append(category, title, description);
+
+    const button = document.createElement("button");
+    button.type = "button";
+    button.textContent = "Explore";
+
+    button.addEventListener("click", () => {
+        openContent(item.id);
+    });
+
+    card.append(icon, info, button);
+    return card;
+}
+
+// Filter the resources fetched from the API.
+
+function renderCourses() {
+    const query = searchInput.value.trim().toLowerCase();
+
+    const filtered = contents.filter(item => {
+        const category = getCategory(item);
+
+        const matchesCategory =
+            selectedCategory === "All" ||
+            category === selectedCategory;
+
+        const searchableText = [
+            item.name,
+            item.original_filename,
+            item.category,
+            item.description
+        ].join(" ").toLowerCase();
+
+        const matchesSearch = searchableText.includes(query);
+
+        return matchesCategory && matchesSearch;
+    });
+
+    courseList.replaceChildren();
+
+    if (loading) {
+        const message = document.createElement("div");
+        message.className = "empty";
+        message.textContent = "Loading educational resources...";
+        courseList.appendChild(message);
+        return;
+    }
+
+    if (filtered.length === 0) {
+        const empty = document.createElement("div");
+        empty.className = "empty";
+        empty.textContent =
+            selectedCategory !== "All"
+                ? `No resources found in ${selectedCategory}.`
+                : "No matching resources found. Try another search.";
+
+        courseList.appendChild(empty);
+        return;
+    }
+
+    filtered.forEach(item => {
+        courseList.appendChild(createResourceCard(item));
+    });
+}
+
+// Load resources from the same endpoint as the home page.
+async function loadContent() {
+    if (loading) return;
+
+    loading = true;
+    renderCourses();
+
+    try {
+        const response = await fetch(`${API_BASE}/content`);
+        const data = await readResponse(response);
+
+        if (!Array.isArray(data)) {
+            throw new Error("The server did not return a resource list.");
+        }
+
+        contents = data;
+        renderCourses();
+    } catch (error) {
+        console.error("Could not load educational resources:", error);
+
+        courseList.replaceChildren();
+
+        const message = document.createElement("div");
+        message.className = "empty";
+        message.textContent =
+            `Could not load resources: ${error.message}`;
+
+        const retry = document.createElement("button");
+        retry.type = "button";
+        retry.textContent = "Try again";
+        retry.style.marginTop = "15px";
+
+        retry.addEventListener("click", loadContent);
+
+        message.appendChild(document.createElement("br"));
+        message.appendChild(retry);
+        courseList.appendChild(message);
+    } finally {
+        loading = false;
+
+        // Re-render only after a successful fetch.
+        if (contents.length > 0) {
+            renderCourses();
+        }
+    }
+}
+
+// Live search.
+searchInput.addEventListener("input", renderCourses);
+
+
+ // Category filtering.
+filterButtons.forEach(button => {
+    button.addEventListener("click", () => {
+        selectedCategory = button.dataset.category;
+
+        // Highlight the selected category.
+        filterButtons.forEach(filter => {
+            const isActive = filter === button;
+            filter.classList.toggle("active", isActive);
+            filter.setAttribute("aria-pressed", String(isActive));
+        });
+
+        // Display all resources in the selected category.
+        renderCourses();
+    });
+});
+
+// Same navigation destinations as the existing page.
+window.goHome = () => {
+    window.location.href = "/live.html";
+};
+
+window.goSearch = () => {
+    window.location.href = "/search.html";
+};
+
+window.goDiscover = () => {
+    window.location.href = "/discover.html";
+};
+
+window.goProfile = () => {
+    window.location.href = "/profile.html";
+};
+
+function getCategory(item) {
+    const category = String(item.category || "Other").trim();
+
+    const knownCategories = [
+        "Technology",
+        "Science",
+        "Business",
+        "Mathematics",
+        "Languages",
+        "Other"
+    ];
+
+    return knownCategories.find(
+        value => value.toLowerCase() === category.toLowerCase()
+    ) || "Other";
+}
+
+
+// Start the search page.
+loadContent();
+</script>
+
+</body>
+</html>

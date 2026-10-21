@@ -1,0 +1,252 @@
+<!DOCTYPE html> <html lang="en"> <head> <meta charset="UTF-8"> <meta name="viewport" content="width=device-width, initial-scale=1.0"
+
+<title></title>
+
+
+<link rel="icon" type="image/png" sizes="100x100" href="icon.png">
+
+
+
+<style> * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
+
+body { min-height: 100vh; display: flex; justify-content: center; align-items: center; background: linear-gradient( 135deg, #667eea, #764ba2 );
+
+padding: 20px; }
+
+.register-container { width: 100%; max-width: 400px; background: white; padding: 40px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2); }
+
+.register-container h1 { text-align: center; margin-bottom: 10px; color: #333; }
+
+.register-container p { text-align: center; color: #777; margin-bottom: 30px; }
+
+.form-group { margin-bottom: 20px; }
+
+.form-group label { display: block; margin-bottom: 8px; color: #333; font-weight: bold; }
+
+.form-group input { width: 100%; padding: 13px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; outline: none; transition: 0.3s; }
+
+.form-group input:focus { border-color: #667eea;
+
+box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15); }
+
+.register-btn { width: 100%; padding: 14px; background: #1a3ac7; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+
+.register-btn:hover { background: #465cda; }
+
+.register-btn:disabled { background: #aaa; cursor: not-allowed; }
+
+.message { display: none; margin-bottom: 20px; padding: 12px; border-radius: 8px; text-align: center; }
+
+.error { display: block; background: #ffe5e5; color: #d8000c; }
+
+.success { display: block; background: #e5ffe9; color: #087f23; }
+
+.login-link { text-align: center; margin-top: 20px; color: #777; }
+
+.login-link a { color: #667eea; text-decoration: none; font-weight: bold; }
+
+.login-link a:hover { text-decoration: underline; }
+.register-btn{
+    background-color: #350bbf;
+} </style> </head>
+<body>
+
+<div class="register-container">
+
+<h1>Create Account</h1>
+
+<p>Join Edu-studio today</p>
+
+<div id="message" class="message"></div>
+
+<form id="registerForm">
+
+<div class="form-group">
+
+<label for="username"> Username </label>
+
+<input type="text" id="username" name="username" placeholder="Enter your username" required minlength="3" >
+
+</div>
+
+<div class="form-group">
+
+<label for="email"> Email </label>
+
+<input type="email" id="email" name="email" placeholder="Enter your email" required >
+
+</div>
+
+<div class="form-group">
+
+<label for="password"> Password </label>
+
+<input type="password" id="password" name="password" placeholder="Enter your password" required minlength="6" >
+
+</div>
+
+<div class="form-group">
+
+<label for="confirmPassword"> Confirm Password </label>
+
+<input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirm your password" required minlength="6" >
+
+</div>
+
+<button type="submit" class="register-btn" id="registerButton"  > Create Account </button>
+
+</form>
+
+<div class="login-link">
+
+Already have an account?
+
+<a href="sample.html"> Login </a>
+
+</div>
+
+</div>
+
+
+
+<div class="footer">
+  Created by
+  <a href="https://www.instagram.com/jones_teo_the_great/" target="_blank" rel="noopener noreferrer">
+    Inno Jones
+  </a>
+</div>
+
+<style>
+.footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: 10px;
+  text-align: center;
+  background: #fff;
+  color: #777;
+  font-size: 12px;
+  border-top: 1px solid #eee;
+}
+
+.footer a {
+  color: #000;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.footer a:hover {
+  text-decoration: underline;
+}
+</style>
+
+
+
+
+
+
+
+
+
+
+
+<script>
+
+const registerForm = document.getElementById("registerForm");
+const registerButton = document.getElementById("registerButton");
+const message = document.getElementById("message");
+
+if (!registerForm || !registerButton || !message) {
+    alert("Error: A required HTML element ID is missing.");
+    console.error("Check registerForm, registerButton and message IDs.");
+} else {
+    registerForm.addEventListener("submit", async function (event) {
+        event.preventDefault();
+
+        console.log("Create Account button clicked.");
+
+        const username = document.getElementById("username").value.trim();
+        const email = document.getElementById("email").value.trim();
+        const password = document.getElementById("password").value;
+        const confirmPassword =
+            document.getElementById("confirmPassword").value;
+
+        message.className = "message";
+        message.textContent = "";
+
+        if (password !== confirmPassword) {
+            message.className = "message error";
+            message.textContent = "Passwords do not match.";
+            return;
+        }
+
+        registerButton.disabled = true;
+        registerButton.textContent = "Creating account...";
+
+        try {
+            message.style.display = "block";
+            message.textContent = "Connecting to server...";
+
+            const response = await fetch(
+                "http://127.0.0.1:8000/users",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        username: username,
+                        email: email,
+                        password: password
+                    })
+                }
+            );
+
+            const data = await response.json();
+
+            console.log("Server status:", response.status);
+            console.log("Server response:", data);
+
+            if (!response.ok) {
+                message.className = "message error";
+                message.textContent =
+                    typeof data.detail === "string"
+                        ? data.detail
+                        : JSON.stringify(data.detail || data);
+
+                return;
+            }
+
+            localStorage.setItem("user", JSON.stringify(data));
+
+            message.className = "message success";
+            message.textContent = "Registration successful! Redirecting...";
+
+            console.log("Saved user. Redirecting to live.html");
+
+            window.location.href = new URL(
+                "live.html",
+                window.location.href
+            ).href;
+
+        } catch (error) {
+            console.error("Registration failed:", error);
+
+            message.className = "message error";
+            message.textContent =
+                "Could not connect to the API. Check the server and browser console.";
+
+        } finally {
+            registerButton.disabled = false;
+            registerButton.textContent = "Create Account";
+        }
+    });
+}
+
+
+
+
+</script>
+
+</body> </html>
