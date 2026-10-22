@@ -1270,8 +1270,7 @@ function getPreviewHTML(item) {
 
 // Open supported files in the browser, without forcing a download.
 function openContent(contentId) {
-    const url =
-        `${API_BASE}/content/${encodeURIComponent(contentId)}/preview`;
+const url = `${API_BASE}/content/${id}/preview`;
 
     window.open(url, "_blank", "noopener");
 }
