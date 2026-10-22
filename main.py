@@ -464,12 +464,14 @@ def login_user(user: UserLogin, db: Session = Depends(get_db)):
 # ============================================================
 # EDUCATIONAL CONTENT UPLOADS
 # ============================================================
+# Use a consistent absolute path for uploaded files.
+BASE_DIR = Path(__file__).resolve().parent
 
-UPLOAD_DIR = Path("uploads")
+UPLOAD_DIR = BASE_DIR / "uploads"
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+
 PROFILE_PIC_DIR = UPLOAD_DIR / "profile_pics"
 PROFILE_PIC_DIR.mkdir(parents=True, exist_ok=True)
-
 ALLOWED_PROFILE_PIC_EXTENSIONS = {
     ".jpg", ".jpeg", ".png", ".webp"
 }
