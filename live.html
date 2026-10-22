@@ -1730,6 +1730,25 @@ if (user && user.id) {
         usernameElement.textContent = user.username || "User";
     }
 
+
+
+function openContent(contentId) {
+  const API_BASE = "https://edu-studio-681e.onrender.com";
+
+  const url =
+    `${API_BASE}/content/${encodeURIComponent(contentId)}/preview`;
+
+  window.open(url, "_blank", "noopener");
+}
+
+
+    readButton.addEventListener("click", () => {
+  openContent(item.id);
+});
+
+
+    
+
     loadContent();
 }
 </script>
