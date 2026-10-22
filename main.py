@@ -15,6 +15,25 @@ from sqlalchemy import (
     UniqueConstraint,
     event,
 )
+
+
+
+from fastapi.middleware.cors import CORSMiddleware
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "https://edu-studio.mbiliruth35.workers.dev"
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
+
+
+
 from sqlalchemy.orm import Session, declarative_base, sessionmaker
 
 import mimetypes
