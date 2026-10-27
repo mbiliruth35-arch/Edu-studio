@@ -1719,17 +1719,6 @@ async function addPostComment(postId, content) {
     return await readResponse(response);
 }
 
-// ============================================================
-// INITIALIZE HOME PAGE
-// ============================================================
-
-if (user && user.id) {
-    const usernameElement = document.getElementById("username");
-
-    if (usernameElement) {
-        usernameElement.textContent = user.username || "User";
-    }
-
 
 
 function openContent(contentId) {
@@ -1741,10 +1730,34 @@ function openContent(contentId) {
   window.open(url, "_blank", "noopener");
 }
 
+function openContent(contentId) {
+    const API_BASE = "https://edu-studio-681e.onrender.com";
+
+    const url =
+        `${API_BASE}/content/${encodeURIComponent(contentId)}/preview`;
+
+    window.open(url, "_blank", "noopener");
+}
+
 const readButton = document.getElementById("readButton");
-    readButton.addEventListener("click", () => {
-  openContent(item.id);
+
+readButton.addEventListener("click", () => {
+    openContent(item.id);
 });
+
+
+
+
+// ============================================================
+// INITIALIZE HOME PAGE
+// ============================================================
+
+if (user && user.id) {
+    const usernameElement = document.getElementById("username");
+
+    if (usernameElement) {
+        usernameElement.textContent = user.username || "User";
+    }
 
 
     
