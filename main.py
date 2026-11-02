@@ -1012,6 +1012,42 @@ def create_content_comment(
     return format_content_comment(db, comment)
 
 
+# ============================================================
+# DELETE YOUR OWN EDUCATIONAL CONTENT COMMENT
+# ============================================================
+
+@app.delete("/content-comments/{comment_id}")
+def delete_content_comment(
+    comment_id: int,
+    user_id: int = Query(...),
+    db: Session = Depends(get_db),
+):
+    comment = (
+        db.query(ContentComment)
+        .filter(ContentComment.id == comment_id)
+        .first()
+    )
+
+    if comment is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Comment not found",
+        )
+
+    # Only the person who posted the comment can delete it.
+    if comment.user_id != user_id:
+        raise HTTPException(
+            status_code=403,
+            detail="You can only delete your own comments",
+        )
+
+    db.delete(comment)
+    db.commit()
+
+    return {
+        "message": "Comment deleted successfully"
+    }
+
 
 
 
