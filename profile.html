@@ -722,37 +722,55 @@ body {
 </style>
 
 
-
-
-
-
-
-
 <script>
 
-
-
-
 /* ============================================================
-   PROFILE PICTURE UPLOAD
+   CONFIGURATION
    ============================================================ */
+
+const API_BASE = "https://edu-studio-681e.onrender.com";
+
+const statusElement = document.getElementById("status");
+const profileForm = document.getElementById("profileForm");
+const saveButton = document.getElementById("saveButton");
 
 const pictureInput = document.getElementById("profilePictureInput");
 const uploadPictureButton = document.getElementById("uploadPictureButton");
 const cancelPictureButton = document.getElementById("cancelPictureButton");
+
 const avatarImage = document.getElementById("avatarImage");
 const avatarInitial = document.getElementById("avatarInitial");
 
+const myContentList = document.getElementById("myContentList");
+
 const MAX_PROFILE_PICTURE_SIZE = 5 * 1024 * 1024;
+
+let currentUser = null;
+let savedUsername = "";
+let savedEmail = "";
 
 let selectedPicture = null;
 let previewObjectUrl = null;
 let savedProfilePicture = null;
 
+
+/* ============================================================
+   STATUS
+   ============================================================ */
+
+function showStatus(message) {
+  statusElement.textContent = message;
+}
+
+
+/* ============================================================
+   PROFILE PICTURE DISPLAY
+   ============================================================ */
+
 function getProfilePictureUrl(path) {
+
   if (!path) return "";
 
-  // Support both absolute URLs and paths returned by FastAPI.
   if (/^https?:\/\//i.test(path)) {
     return path;
   }
@@ -760,16 +778,20 @@ function getProfilePictureUrl(path) {
   return `${API_BASE}${path.startsWith("/") ? "" : "/"}${path}`;
 }
 
+
 function displayProfilePicture(path, username = "User") {
+
   const pictureUrl = getProfilePictureUrl(path);
 
   avatarInitial.textContent =
     (username || "U").charAt(0).toUpperCase();
 
   if (!pictureUrl) {
+
     avatarImage.removeAttribute("src");
     avatarImage.hidden = true;
     avatarInitial.hidden = false;
+
     return;
   }
 
@@ -786,7 +808,13 @@ function displayProfilePicture(path, username = "User") {
   avatarImage.src = pictureUrl;
 }
 
+
+/* ============================================================
+   PROFILE PICTURE SELECTION
+   ============================================================ */
+
 pictureInput.addEventListener("change", () => {
+
   const file = pictureInput.files?.[0];
 
   selectedPicture = null;
@@ -797,9 +825,7 @@ pictureInput.addEventListener("change", () => {
     previewObjectUrl = null;
   }
 
-  if (!file) {
-    return;
-  }
+  if (!file) return;
 
   const allowedTypes = [
     "image/jpeg",
@@ -808,18 +834,26 @@ pictureInput.addEventListener("change", () => {
   ];
 
   if (!allowedTypes.includes(file.type)) {
+
     showStatus("Please choose a JPG, PNG or WebP image.");
     pictureInput.value = "";
+
     return;
   }
 
   if (file.size === 0 || file.size > MAX_PROFILE_PICTURE_SIZE) {
-    showStatus("Choose an image that is larger than 0 bytes and no more than 5 MB.");
+
+    showStatus(
+      "Choose an image larger than 0 bytes and no more than 5 MB."
+    );
+
     pictureInput.value = "";
+
     return;
   }
 
   selectedPicture = file;
+
   previewObjectUrl = URL.createObjectURL(file);
 
   avatarImage.onload = () => {
@@ -828,7 +862,9 @@ pictureInput.addEventListener("change", () => {
   };
 
   avatarImage.onerror = () => {
+
     showStatus("Could not preview this image.");
+
     cancelPictureSelection();
   };
 
@@ -838,16 +874,26 @@ pictureInput.addEventListener("change", () => {
   cancelPictureButton.hidden = false;
 
   showStatus("Picture selected. Preview it, then upload.");
+
 });
 
+
+/* ============================================================
+   CANCEL PROFILE PICTURE SELECTION
+   ============================================================ */
+
 function cancelPictureSelection() {
+
   selectedPicture = null;
+
   pictureInput.value = "";
   uploadPictureButton.disabled = true;
   cancelPictureButton.hidden = true;
 
   if (previewObjectUrl) {
+
     URL.revokeObjectURL(previewObjectUrl);
+
     previewObjectUrl = null;
   }
 
@@ -855,20 +901,31 @@ function cancelPictureSelection() {
     savedProfilePicture,
     savedUsername || "User"
   );
+
 }
+
 
 cancelPictureButton.addEventListener(
   "click",
   cancelPictureSelection
 );
 
+
+/* ============================================================
+   UPLOAD PROFILE PICTURE
+   ============================================================ */
+
 uploadPictureButton.addEventListener("click", async () => {
+
   if (!currentUser || !selectedPicture) {
+
     showStatus("Please choose a picture first.");
+
     return;
   }
 
   const formData = new FormData();
+
   formData.append("file", selectedPicture);
 
   uploadPictureButton.disabled = true;
@@ -878,6 +935,7 @@ uploadPictureButton.addEventListener("click", async () => {
   showStatus("Uploading your profile picture...");
 
   try {
+
     const response = await fetch(
       `${API_BASE}/users/${encodeURIComponent(currentUser.id)}/profile-picture`,
       {
@@ -889,109 +947,96 @@ uploadPictureButton.addEventListener("click", async () => {
     const data = await response.json().catch(() => ({}));
 
     if (!response.ok) {
+
       throw new Error(
         data.detail || "Could not upload your profile picture."
       );
+
     }
 
     savedProfilePicture = data.profile_pic;
 
-    // Release the temporary preview URL.
     if (previewObjectUrl) {
+
       URL.revokeObjectURL(previewObjectUrl);
+
       previewObjectUrl = null;
     }
 
     selectedPicture = null;
+
     pictureInput.value = "";
 
-    // Add a cache-busting query so the new image appears immediately.
-    const pictureUrl = getProfilePictureUrl(savedProfilePicture);
-
     displayProfilePicture(
-      pictureUrl
-        ? `${pictureUrl}${pictureUrl.includes("?") ? "&" : "?"}v=${Date.now()}`
+      savedProfilePicture
+        ? `${getProfilePictureUrl(savedProfilePicture)}?v=${Date.now()}`
         : "",
       savedUsername || "User"
     );
 
     cancelPictureButton.hidden = true;
+
     showStatus("Profile picture updated successfully.");
 
   } catch (error) {
+
     showStatus(
       error.message || "An error occurred while uploading."
     );
+
   } finally {
+
     uploadPictureButton.disabled = !selectedPicture;
     pictureInput.disabled = false;
     cancelPictureButton.disabled = false;
+
   }
+
 });
 
-
-
-
-
-
-
-
-
-
-
-
-/* ============================================================
-   CONFIGURATION
-   ============================================================ */
-
-// Change this if your FastAPI server uses another address.
-const API_BASE = "https://edu-studio-681e.onrender.com";
-
-const statusElement = document.getElementById("status");
-const profileForm = document.getElementById("profileForm");
-const saveButton = document.getElementById("saveButton");
-
-let currentUser = null;
-let savedUsername = "";
-let savedEmail = "";
-
-/* ============================================================
-   STATUS
-   ============================================================ */
-
-function showStatus(message) {
-  statusElement.textContent = message;
-}
 
 /* ============================================================
    LOGOUT
    ============================================================ */
 
 function logout() {
+
   localStorage.removeItem("user");
+
   location.replace("/profile.html");
+
 }
+
 
 document.getElementById("logoutButton")
   .addEventListener("click", () => {
+
     if (confirm("Are you sure you want to log out?")) {
+
       logout();
+
     }
+
   });
+
 
 /* ============================================================
    LOAD USER PROFILE
    ============================================================ */
 
 async function loadProfile() {
+
   const storedUser = localStorage.getItem("user");
 
   if (!storedUser) {
+
     logout();
+
     return;
   }
 
   try {
+
     currentUser = JSON.parse(storedUser);
 
     if (
@@ -999,9 +1044,11 @@ async function loadProfile() {
       !Number.isInteger(Number(currentUser.id)) ||
       Number(currentUser.id) < 1
     ) {
+
       throw new Error(
         "User information is missing. Please log in again."
       );
+
     }
 
     const response = await fetch(
@@ -1009,14 +1056,18 @@ async function loadProfile() {
     );
 
     if (response.status === 404) {
+
       logout();
+
       return;
     }
 
     if (!response.ok) {
+
       throw new Error(
         "Could not load your profile. Check your API server."
       );
+
     }
 
     const user = await response.json();
@@ -1029,16 +1080,15 @@ async function loadProfile() {
 
     document.getElementById("displayEmail").textContent =
       user.email;
-    
-avatarInitial.textContent =
-  user.username.charAt(0).toUpperCase() || "U";
+
     document.getElementById("username").value =
       user.username;
 
     document.getElementById("email").value =
       user.email;
 
-    // Update the cached user without adding sensitive information.
+    // Update the logged-in user information.
+
     currentUser = {
       ...currentUser,
       id: user.id,
@@ -1051,34 +1101,43 @@ avatarInitial.textContent =
       JSON.stringify(currentUser)
     );
 
+    // Load the saved profile picture.
+
+    savedProfilePicture = user.profile_pic || null;
+
+    displayProfilePicture(
+      savedProfilePicture,
+      user.username
+    );
+
     showStatus("Your profile is up to date.");
 
+    // Load only this user's uploaded content.
+
+    await loadMyContent();
+
   } catch (error) {
+
     showStatus(
       error.message || "Unable to load your profile."
     );
-  }
-}
-  displayProfilePicture(
-  user.profile_pic,
-  user.username
-);
 
-loadMyContent();
+  }
+
+}
 
 
 /* ============================================================
    MY POSTED CONTENT
    ============================================================ */
 
-const myContentList = document.getElementById("myContentList");
-
-
 async function loadMyContent() {
 
   if (!currentUser) {
+
     myContentList.innerHTML =
       '<p class="content-message">Please log in to view your content.</p>';
+
     return;
   }
 
@@ -1092,14 +1151,20 @@ async function loadMyContent() {
     );
 
     if (!response.ok) {
-      throw new Error("Could not load your uploaded content.");
+
+      throw new Error(
+        "Could not load your uploaded content."
+      );
+
     }
 
     const items = await response.json();
 
     if (!Array.isArray(items) || items.length === 0) {
+
       myContentList.innerHTML =
         '<p class="content-message">You have not uploaded any content yet.</p>';
+
       return;
     }
 
@@ -1110,16 +1175,19 @@ async function loadMyContent() {
         : "Date unavailable";
 
       return `
+
         <div class="my-content-item">
 
           <h3>${escapeContentText(item.name)}</h3>
 
           <p>
-            Category: ${escapeContentText(item.category || "Other")}
+            Category:
+            ${escapeContentText(item.category || "Other")}
           </p>
 
           <p>
-            Uploaded: ${escapeContentText(uploadDate)}
+            Uploaded:
+            ${escapeContentText(uploadDate)}
           </p>
 
           <div class="my-content-actions">
@@ -1128,59 +1196,77 @@ async function loadMyContent() {
               type="button"
               class="content-open-button"
               data-open-content="${Number(item.id)}">
+
               View Content
+
             </button>
 
             <button
               type="button"
               class="content-delete-button"
               data-delete-content="${Number(item.id)}">
+
               Delete
+
             </button>
 
           </div>
 
         </div>
+
       `;
 
     }).join("");
 
   } catch (error) {
 
-    myContentList.innerHTML =
-      `<p class="content-message">${escapeContentText(error.message)}</p>`;
+    myContentList.innerHTML = `
+      <p class="content-message">
+        ${escapeContentText(error.message)}
+      </p>
+    `;
 
   }
+
 }
 
 
-/* Safely display text returned by the API. */
+/* ============================================================
+   ESCAPE TEXT FOR SAFE DISPLAY
+   ============================================================ */
 
 function escapeContentText(value) {
+
   return String(value ?? "").replace(/[&<>"']/g, character => ({
+
     "&": "&amp;",
     "<": "&lt;",
     ">": "&gt;",
     '"': "&quot;",
     "'": "&#039;"
+
   })[character]);
+
 }
 
 
 /* ============================================================
-   DELETE MY CONTENT
+   DELETE MY UPLOADED CONTENT
    ============================================================ */
 
 async function deleteMyContent(contentId) {
 
   if (!currentUser) {
+
     showStatus("Please log in again.");
+
     return;
   }
 
   if (!confirm(
     "Are you sure you want to permanently delete this content?"
   )) {
+
     return;
   }
 
@@ -1196,9 +1282,11 @@ async function deleteMyContent(contentId) {
     const data = await response.json().catch(() => ({}));
 
     if (!response.ok) {
+
       throw new Error(
         data.detail || "Could not delete this content."
       );
+
     }
 
     showStatus("Your content was deleted successfully.");
@@ -1212,27 +1300,34 @@ async function deleteMyContent(contentId) {
     );
 
   }
+
 }
 
 
 /* ============================================================
-   CONTENT BUTTON EVENTS
+   MY CONTENT BUTTON EVENTS
    ============================================================ */
 
 myContentList.addEventListener("click", event => {
 
-  const deleteButton = event.target.closest("[data-delete-content]");
+  const deleteButton = event.target.closest(
+    "[data-delete-content]"
+  );
 
   if (deleteButton) {
 
     const contentId = deleteButton.dataset.deleteContent;
+
+    deleteButton.disabled = true;
 
     deleteMyContent(contentId);
 
     return;
   }
 
-  const openButton = event.target.closest("[data-open-content]");
+  const openButton = event.target.closest(
+    "[data-open-content]"
+  );
 
   if (openButton) {
 
@@ -1249,19 +1344,13 @@ myContentList.addEventListener("click", event => {
 });
 
 
-
-
-
-
-
-
-  
 /* ============================================================
-   CANCEL EDITING
+   CANCEL PROFILE EDITING
    ============================================================ */
 
 document.getElementById("cancelButton")
   .addEventListener("click", () => {
+
     document.getElementById("username").value =
       savedUsername;
 
@@ -1269,19 +1358,24 @@ document.getElementById("cancelButton")
       savedEmail;
 
     showStatus("Changes discarded.");
+
   });
+
 
 /* ============================================================
    SAVE PROFILE
    ============================================================ */
 
 profileForm.addEventListener("submit", async event => {
+
   event.preventDefault();
 
   if (!currentUser) {
+
     showStatus(
       "Your profile has not loaded. Please log in again."
     );
+
     return;
   }
 
@@ -1292,34 +1386,43 @@ profileForm.addEventListener("submit", async event => {
     document.getElementById("email").value.trim();
 
   if (!username || !email) {
+
     showStatus("Please enter your username and email.");
+
     return;
   }
 
   saveButton.disabled = true;
+
   showStatus("Saving your changes...");
 
   try {
+
     const response = await fetch(
       `${API_BASE}/users/${encodeURIComponent(currentUser.id)}`,
       {
         method: "PUT",
+
         headers: {
           "Content-Type": "application/json"
         },
+
         body: JSON.stringify({
           username: username,
           email: email
         })
+
       }
     );
 
     const data = await response.json().catch(() => ({}));
 
     if (!response.ok) {
+
       throw new Error(
         data.detail || "Unable to update your profile."
       );
+
     }
 
     savedUsername = data.username;
@@ -1343,36 +1446,47 @@ profileForm.addEventListener("submit", async event => {
     document.getElementById("displayEmail").textContent =
       data.email;
 
-    document.getElementById("avatar").textContent =
-      data.username.charAt(0).toUpperCase() || "U";
-
     document.getElementById("username").value =
       data.username;
 
     document.getElementById("email").value =
       data.email;
 
+    // Update the avatar without removing its image element.
+
+    displayProfilePicture(
+      savedProfilePicture,
+      data.username
+    );
+
     showStatus("Profile updated successfully.");
 
   } catch (error) {
+
     showStatus(
       error.message || "An error occurred while saving."
     );
+
   } finally {
+
     saveButton.disabled = false;
+
   }
+
 });
 
+
 /* ============================================================
-   INITIALIZE
+   INITIALIZE PROFILE PAGE
    ============================================================ */
 
 loadProfile();
 
-
-
-  
 </script>
+
+
+
+
 
 </body>
 </html>
