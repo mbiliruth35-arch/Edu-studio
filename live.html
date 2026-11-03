@@ -15,6 +15,35 @@
 
 
 
+.delete-comment-button {
+    display: inline-block;
+    margin-top: 8px;
+    padding: 6px 12px;
+    border: none;
+    border-radius: 20px;
+    background: #fff0f0;
+    color: #d21f3c;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.delete-comment-button:hover {
+    background: #ffdede;
+}
+
+.delete-comment-button:disabled {
+    opacity: 0.5;
+    cursor: wait;
+}
+
+
+
+
+
+    
+
 
 
 
@@ -1136,6 +1165,8 @@ async function toggleContentLike(button) {
     }
 }
 
+
+
 async function loadContentComments(contentId, listElement) {
     listElement.innerHTML =
         '<p class="feed-status">Loading comments...</p>';
@@ -1159,17 +1190,88 @@ async function loadContentComments(contentId, listElement) {
 
         listElement.innerHTML = comments.map(comment => `
             <div class="comment-item">
-                <strong>${escapeHTML(comment.username || "User")}</strong>
+
+                <strong>
+                    ${escapeHTML(comment.username || "User")}
+                </strong>
+
                 <p>${escapeHTML(comment.content)}</p>
-                <small>${escapeHTML(formatDate(comment.created_at))}</small>
+
+                <small>
+                    ${escapeHTML(formatDate(comment.created_at))}
+                </small>
+
+                ${
+                    user && Number(comment.user_id) === Number(user.id)
+                    ? `
+                        <button
+                            type="button"
+                            class="delete-comment-button"
+                            data-delete-comment="${escapeHTML(comment.id)}"
+                            data-content-id="${escapeHTML(contentId)}"
+                        >
+                            Delete
+                        </button>
+                    `
+                    : ""
+                }
+
             </div>
         `).join("");
+
     } catch (error) {
         listElement.innerHTML =
             `<p class="feed-status">${escapeHTML(error.message)}</p>`;
     }
 }
 
+
+// ============================================================
+// DELETE EDUCATIONAL CONTENT COMMENT
+// ============================================================
+
+async function deleteContentComment(commentId, contentId) {
+
+    if (!user || !user.id) {
+        alert("Please log in first.");
+        return;
+    }
+
+    if (!confirm("Are you sure you want to delete this comment?")) {
+        return;
+    }
+
+    try {
+        const response = await fetch(
+            `${API_BASE}/content-comments/${encodeURIComponent(commentId)}` +
+            `?user_id=${encodeURIComponent(user.id)}`,
+            {
+                method: "DELETE"
+            }
+        );
+
+        await readResponse(response);
+
+        const panel = document.getElementById(
+            `content-comments-${contentId}`
+        );
+
+        if (panel) {
+            await loadContentComments(
+                contentId,
+                panel.querySelector(".comment-list")
+            );
+        }
+
+    } catch (error) {
+        alert(error.message || "Could not delete comment.");
+    }
+}
+
+
+
+
+    
 async function addContentComment(contentId, content) {
     if (!user || !user.id) {
         throw new Error("Please log in to comment.");
