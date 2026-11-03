@@ -1678,7 +1678,39 @@ def delete_user_content(
 
 
 
+from fastapi import Depends, HTTPException
+from sqlalchemy.orm import Session
+from pathlib import Path
 
+@app.delete("/content/delete-all")
+def delete_all_content(db: Session = Depends(get_db)):
+    try:
+        # Get all uploaded content records
+        contents = db.query(ContentItem).all()
+
+        deleted_count = 0
+
+        for item in contents:
+            # Delete the physical uploaded file
+            file_path = UPLOAD_DIR / item.stored_filename
+
+            if file_path.exists():
+                file_path.unlink()
+
+            # Delete the database record
+            db.delete(item)
+            deleted_count += 1
+
+        db.commit()
+
+        return {
+            "message": "All posted content has been deleted successfully",
+            "deleted_count": deleted_count
+        }
+
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 
