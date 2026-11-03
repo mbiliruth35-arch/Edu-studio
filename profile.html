@@ -425,6 +425,66 @@ body {
     align-items: flex-start;
   }
 }
+
+  /* MY POSTED CONTENT */
+
+.my-content-item {
+  background: #fff;
+  border: 1px solid #e5e5e5;
+  border-radius: 16px;
+  padding: 18px;
+  margin-bottom: 14px;
+}
+
+.my-content-item h3 {
+  font-size: 16px;
+  margin-bottom: 8px;
+  overflow-wrap: anywhere;
+}
+
+.my-content-item p {
+  color: #777;
+  font-size: 13px;
+  line-height: 1.6;
+  margin-bottom: 10px;
+}
+
+.my-content-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.content-open-button,
+.content-delete-button {
+  border: none;
+  border-radius: 25px;
+  padding: 10px 16px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.content-open-button {
+  background: #000;
+  color: #fff;
+}
+
+.content-delete-button {
+  background: #fff0f0;
+  color: #d21f3c;
+}
+
+.content-delete-button:disabled {
+  opacity: 0.5;
+  cursor: wait;
+}
+
+.content-message {
+  color: #777;
+  font-size: 14px;
+  padding: 10px 0;
+}
 </style>
 </head>
 
@@ -512,6 +572,26 @@ body {
 
   </section>
 
+
+<!-- MY POSTED CONTENT -->
+<section class="content-card">
+
+  <h2>My Posted Content</h2>
+
+  <p class="description">
+    View and manage the educational content you have uploaded.
+  </p>
+
+  <div id="myContentList">
+    <p class="content-message">Loading your content...</p>
+  </div>
+
+</section>
+
+
+
+
+  
   <!-- EDIT PROFILE -->
   <section class="content-card">
 
@@ -949,10 +1029,9 @@ async function loadProfile() {
 
     document.getElementById("displayEmail").textContent =
       user.email;
-
-    document.getElementById("avatar").textContent =
-      user.username.charAt(0).toUpperCase() || "U";
-
+    
+avatarInitial.textContent =
+  user.username.charAt(0).toUpperCase() || "U";
     document.getElementById("username").value =
       user.username;
 
@@ -980,7 +1059,203 @@ async function loadProfile() {
     );
   }
 }
+  displayProfilePicture(
+  user.profile_pic,
+  user.username
+);
 
+loadMyContent();
+
+
+/* ============================================================
+   MY POSTED CONTENT
+   ============================================================ */
+
+const myContentList = document.getElementById("myContentList");
+
+
+async function loadMyContent() {
+
+  if (!currentUser) {
+    myContentList.innerHTML =
+      '<p class="content-message">Please log in to view your content.</p>';
+    return;
+  }
+
+  myContentList.innerHTML =
+    '<p class="content-message">Loading your content...</p>';
+
+  try {
+
+    const response = await fetch(
+      `${API_BASE}/users/${encodeURIComponent(currentUser.id)}/content`
+    );
+
+    if (!response.ok) {
+      throw new Error("Could not load your uploaded content.");
+    }
+
+    const items = await response.json();
+
+    if (!Array.isArray(items) || items.length === 0) {
+      myContentList.innerHTML =
+        '<p class="content-message">You have not uploaded any content yet.</p>';
+      return;
+    }
+
+    myContentList.innerHTML = items.map(item => {
+
+      const uploadDate = item.created_at
+        ? new Date(item.created_at).toLocaleDateString()
+        : "Date unavailable";
+
+      return `
+        <div class="my-content-item">
+
+          <h3>${escapeContentText(item.name)}</h3>
+
+          <p>
+            Category: ${escapeContentText(item.category || "Other")}
+          </p>
+
+          <p>
+            Uploaded: ${escapeContentText(uploadDate)}
+          </p>
+
+          <div class="my-content-actions">
+
+            <button
+              type="button"
+              class="content-open-button"
+              data-open-content="${Number(item.id)}">
+              View Content
+            </button>
+
+            <button
+              type="button"
+              class="content-delete-button"
+              data-delete-content="${Number(item.id)}">
+              Delete
+            </button>
+
+          </div>
+
+        </div>
+      `;
+
+    }).join("");
+
+  } catch (error) {
+
+    myContentList.innerHTML =
+      `<p class="content-message">${escapeContentText(error.message)}</p>`;
+
+  }
+}
+
+
+/* Safely display text returned by the API. */
+
+function escapeContentText(value) {
+  return String(value ?? "").replace(/[&<>"']/g, character => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#039;"
+  })[character]);
+}
+
+
+/* ============================================================
+   DELETE MY CONTENT
+   ============================================================ */
+
+async function deleteMyContent(contentId) {
+
+  if (!currentUser) {
+    showStatus("Please log in again.");
+    return;
+  }
+
+  if (!confirm(
+    "Are you sure you want to permanently delete this content?"
+  )) {
+    return;
+  }
+
+  try {
+
+    const response = await fetch(
+      `${API_BASE}/content/${encodeURIComponent(contentId)}?user_id=${encodeURIComponent(currentUser.id)}`,
+      {
+        method: "DELETE"
+      }
+    );
+
+    const data = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+      throw new Error(
+        data.detail || "Could not delete this content."
+      );
+    }
+
+    showStatus("Your content was deleted successfully.");
+
+    await loadMyContent();
+
+  } catch (error) {
+
+    showStatus(
+      error.message || "An error occurred while deleting content."
+    );
+
+  }
+}
+
+
+/* ============================================================
+   CONTENT BUTTON EVENTS
+   ============================================================ */
+
+myContentList.addEventListener("click", event => {
+
+  const deleteButton = event.target.closest("[data-delete-content]");
+
+  if (deleteButton) {
+
+    const contentId = deleteButton.dataset.deleteContent;
+
+    deleteMyContent(contentId);
+
+    return;
+  }
+
+  const openButton = event.target.closest("[data-open-content]");
+
+  if (openButton) {
+
+    const contentId = openButton.dataset.openContent;
+
+    window.open(
+      `${API_BASE}/content/${encodeURIComponent(contentId)}/preview`,
+      "_blank",
+      "noopener"
+    );
+
+  }
+
+});
+
+
+
+
+
+
+
+
+  
 /* ============================================================
    CANCEL EDITING
    ============================================================ */
@@ -1093,6 +1368,10 @@ profileForm.addEventListener("submit", async event => {
    ============================================================ */
 
 loadProfile();
+
+
+
+  
 </script>
 
 </body>
