@@ -27,7 +27,7 @@ import mimetypes
 
 from fastapi.responses import FileResponse
 
-
+from fastapi import Query
 
 
 
@@ -1612,3 +1612,81 @@ def get_admin_stats(db: Session = Depends(get_db)):
         "total_users": total_users,
         "total_content": total_content,
     }
+
+
+
+@app.get("/users/{user_id}/content")
+def get_user_content(
+    user_id: int,
+    db: Session = Depends(get_db)
+):
+    content_items = (
+        db.query(ContentItem)
+        .filter(ContentItem.user_id == user_id)
+        .order_by(ContentItem.created_at.desc())
+        .all()
+    )
+
+    return [
+        {
+            "id": item.id,
+            "name": item.name,
+            "category": item.category,
+            "created_at": item.created_at,
+            "original_filename": item.original_filename
+        }
+        for item in content_items
+    ]
+
+
+@app.delete("/content/{content_id}")
+def delete_user_content(
+    content_id: int,
+    user_id: int = Query(...),
+    db: Session = Depends(get_db)
+):
+    item = (
+        db.query(ContentItem)
+        .filter(
+            ContentItem.id == content_id,
+            ContentItem.user_id == user_id
+        )
+        .first()
+    )
+
+    if item is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Content not found or you do not have permission to delete it."
+        )
+
+    file_path = UPLOAD_DIR / item.stored_filename
+
+    db.delete(item)
+    db.commit()
+
+    # Delete the physical uploaded file too, if it exists.
+    if file_path.is_file():
+        file_path.unlink()
+
+    return {
+        "message": "Content deleted successfully."
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
